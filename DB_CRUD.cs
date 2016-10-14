@@ -1,21 +1,65 @@
-﻿using Project_1_DataBase_1;
+/*********************************************************************
+**
+**      INSTITUTO TECNOLOGICO DE COSTA RICA
+**      SEDE CARTAGO
+**      
+**      ESCUELA DE COMPUTACION
+**      BASE DE DATOS
+**
+**      AUTORES:
+**          JOSE BLANCO 
+**          JOEL GORIN
+**          EDWIN SEGURA
+**
+**      2do SEMESTRE 2016
+**      GRUPO 02
+**
+**********************************************************************/
+
+using Project_1_DataBase_1;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Web;
 
-
-
 namespace Proyecto_2.Properties
 {
+
+	/**********************************************************
+	*
+	*	OBJETIVO:
+	*		Es una clase que contiene funciones que realizan
+	*		todos los comandos relacionados con el manejo de 
+	*		la base de datos.
+	*
+	*	PROPOSITO:
+	*		Gracias a esta clase se pueden centralizar todas
+	*		las consultas con la base de datos (vease CRUD) 
+	*		sin necesidad de entrar a detalle fuera de esta
+	*		clase, simplificando el trabajo en otras clases.
+	*
+	*	REFERENCIAS:
+	*		
+	*		
+	*
+	*
+	**********************************************************/
+	
     public class DB_CRUD
     {
+        /*********************************************
+        OPEN DATA BASE CONNECTION
+        *********************************************/
+        
         // Usando el string de conexion podemos abrir cualquier base de datos de sql server.
         public static SqlConnection openConnection()
         {
             try
             {
+                // Jose  Source= Data Source=EQUIPO-JOSE;Initial Catalog=Data;Integrated Security=True;Connect Timeout=15;Encrypt=False;TrustServerCertificate=True;ApplicationIntent=ReadWrite;MultiSubnetFailover=False
+                // Joel  Source=
+                // Edwin Source=
                 string DataSource = "Data Source=EQUIPO-JOSE;Initial Catalog=Data;Integrated Security=True;Connect Timeout=15;Encrypt=False;TrustServerCertificate=True;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
                 SqlConnection connection = new SqlConnection(DataSource);
                 connection.Open();
@@ -26,6 +70,7 @@ namespace Proyecto_2.Properties
                 return null;
             }
         }
+        
         /*********************************************
         CREATE
         *********************************************/
@@ -33,7 +78,7 @@ namespace Proyecto_2.Properties
         // Recibe el nombre de la tabla y una lista de strings que son los datos a insertar dentro del SQL
         public void addRowData(string table, List<string> data)
         {
-            //Verifica que la cantidad de datos introducidos sean las mismas que las que ocupa el SQL
+            // Verifica que la cantidad de datos introducidos sean las mismas que las que ocupa el SQL
             if (data.Count() == this.getColumns(table).Count)
             {
                 //En caso de que ocurra una excepcion de tipo SQL es atrapado
@@ -61,13 +106,13 @@ namespace Proyecto_2.Properties
                 }
                 catch (SqlException)
                 {
-                    Console.WriteLine("Ha ocurrido un error y no se pudo desarrollar la accion");
+                    Messagebox.Show("Ha ocurrido un error y no se pudo desarrollar la accion.", "ERROR");
                 }
             }
-            //Aqui iria un messagebox 
+            // Messagebox de error
             else
             {
-                Console.WriteLine("Ha ocurrido un error y no se pudo desarrollar la accion");
+                Messagebox.Show("Ha ocurrido un error y no se pudo desarrollar la accion.", "ERROR");
             }
         }
 
@@ -84,7 +129,7 @@ namespace Proyecto_2.Properties
             SqlDataReader reader = command.ExecuteReader();
             reader.Read();
             List<string> tableNames = new List<string>();
-            //Este ciclo es donde se consiguen los nombres de las tablas.
+            // Este ciclo es donde se consiguen los nombres de las tablas.
             while (reader.Read())
             {
                 string tmpName = reader.GetString(2);
@@ -131,7 +176,7 @@ namespace Proyecto_2.Properties
             return columns;
         }
 
-        //Retorna todas las llaves foraneas de la base de datos
+        // Retorna todas las llaves foraneas de la base de datos
         public List<Relationship> GetForeignKeys()
         {
             List<Relationship> list = new List<Relationship>();
@@ -181,8 +226,7 @@ namespace Proyecto_2.Properties
             return list;
         }
 
-
-        //Retorna las llaves primarias de una tabla
+        // Retorna las llaves primarias de una tabla
         public List<string> getPrimaryKeys(string table)
         {
             List<string> primary = new List<string>();
@@ -255,8 +299,8 @@ namespace Proyecto_2.Properties
         }
 
         /*********************************************
-            UPDATE
-            *********************************************/
+        UPDATE
+        *********************************************/
 
         // Recibe el nombre de la tabla(table), dos strings que forman la condicion del where(where y condition)
         // Una lista de las columnas que se van a modificar(columns) y una lista con los datos a actualizar(data)
@@ -294,10 +338,10 @@ namespace Proyecto_2.Properties
     DELETE
     *********************************************/
 
-    // Esta funcion borra una tupla de la base de datos
+    // Esta funcion borra una tupla de una tabla
     // Recibe el nombre de la tabla y el condicional dividido en dos strings con where siendo la columna
     // y key el valor del dato
-    public void deleteRow(string table, string where,string key)
+    public void deleteRow(string table, string where, string key)
         {
             SqlConnection connection = openConnection();
             SqlCommand command = new SqlCommand("DELETE FROM " + table +" WHERE " + where + "=" + key, connection);
