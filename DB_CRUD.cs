@@ -1,21 +1,22 @@
+﻿using Project_1_DataBase_1;
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Web;
 
-namespace Proyecto_II_SistemaVentas
+
+
+namespace Proyecto_2.Properties
 {
-    class DB_CRUD
+    public class DB_CRUD
     {
         // Usando el string de conexion podemos abrir cualquier base de datos de sql server.
         public static SqlConnection openConnection()
         {
             try
             {
-                string DataSource = "Data Source=DESKTOP-U1C5ALN;Initial Catalog=Banco;Integrated Security=True";
+                string DataSource = "Data Source=EQUIPO-JOSE;Initial Catalog=Data;Integrated Security=True;Connect Timeout=15;Encrypt=False;TrustServerCertificate=True;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
                 SqlConnection connection = new SqlConnection(DataSource);
                 connection.Open();
                 return connection;
@@ -26,21 +27,52 @@ namespace Proyecto_II_SistemaVentas
             }
         }
         /*********************************************
-
         CREATE
-
         *********************************************/
 
-        // Falta comentar *************************************************************************************
+        // Recibe el nombre de la tabla y una lista de strings que son los datos a insertar dentro del SQL
         public void addRowData(string table, List<string> data)
         {
-
+            //Verifica que la cantidad de datos introducidos sean las mismas que las que ocupa el SQL
+            if (data.Count() == this.getColumns(table).Count)
+            {
+                //En caso de que ocurra una excepcion de tipo SQL es atrapado
+                try
+                {
+                    //List<string> columns = this.getColumns(table);
+                    SqlConnection connection = openConnection();
+                    int pos = 0;
+                    string values = " VALUES(";
+                    while (data.Count != pos)
+                    {
+                        if (pos + 1 != data.Count)
+                        {
+                            values += data.ElementAt(pos) + ",";
+                        }
+                        else
+                        {
+                            values += data.ElementAt(pos) + ")";
+                        }
+                        pos++;
+                    }
+                    SqlCommand command = new SqlCommand("INSERT INTO " + table + values, connection);
+                    Console.WriteLine("INSERT INTO " + table + values);
+                    command.ExecuteNonQuery();
+                }
+                catch (SqlException)
+                {
+                    Console.WriteLine("Ha ocurrido un error y no se pudo desarrollar la accion");
+                }
+            }
+            //Aqui iria un messagebox 
+            else
+            {
+                Console.WriteLine("Ha ocurrido un error y no se pudo desarrollar la accion");
+            }
         }
 
         /*********************************************
-
         READ
-
         *********************************************/
 
         // Esta funcion se encarga de obtener todas las tablas de la base de datos.
@@ -99,8 +131,7 @@ namespace Proyecto_II_SistemaVentas
             return columns;
         }
 
-        // ADAPTAR FUNCIÓN A LA PROGRA, DEBE SER MÁS GENÉRICA *********************************************
-        /*
+        //Retorna todas las llaves foraneas de la base de datos
         public List<Relationship> GetForeignKeys()
         {
             List<Relationship> list = new List<Relationship>();
@@ -143,39 +174,54 @@ namespace Proyecto_II_SistemaVentas
                             cont++;
                         }
                     }
-
                     list.Add(key);
                 }
             }
             connection.Close();
             return list;
         }
-        */
-        // ADAPTAR FUNCIÓN A LA PROGRA, DEBE SER MÁS GENÉRICA *********************************************
-        /*
+
+
+        //Retorna las llaves primarias de una tabla
+        public List<string> getPrimaryKeys(string table)
+        {
+            List<string> primary = new List<string>();
+            SqlConnection conexion = DB_CRUD.openConnection();
+            string select = "SELECT * FROM Information_Schema.KEY_COLUMN_USAGE";
+            SqlCommand comando = new SqlCommand(select, conexion);
+            SqlDataReader leer = comando.ExecuteReader();
+            while (leer.Read())
+            {
+                string nombre = leer.GetString(2);
+                Console.WriteLine(nombre);
+                if (nombre.Equals("PK_" + table))
+                {
+                    string dato = leer.GetString(6);
+                    primary.Add(dato.ToString());
+                }
+            }
+            return primary;
+        }
+
+        //Une todas las tabla de la base de datos
         public string JoinAll()
         {
-            List<Relationship> list = c.GetForeignKeys();
+            List<Relationship> list = this.GetForeignKeys();
             string join = "";
-
             if (list.Count > 0)
             {
                 Relationship key = list.ElementAt(0);
                 List<string> visited = new List<string>();
                 visited.Add(key.GetPrimary());
                 visited.Add(key.GetForeign());
-
                 join = join = key.GetPrimary() + " JOIN " + key.GetForeign() + " ON "
                 + key.GetPrimary() + "." + key.GetColumn() + " = " + key.GetForeign() + "." +
                 key.GetColumn();
-
                 int times_left = list.Count - 1;
                 Console.WriteLine("Total times left" + times_left);
                 int pos = 0;
-
                 while (times_left != 0)
                 {
-
                     if (visited.Contains(list.ElementAt(pos).GetPrimary()) && !visited.Contains(list.ElementAt(pos).GetForeign()))
                     {
                         Console.WriteLine("ENTERED THE IF CONDITION");
@@ -191,7 +237,6 @@ namespace Proyecto_II_SistemaVentas
                         key = list.ElementAt(pos);
                         times_left--;
                         visited.Add(list.ElementAt(pos).GetPrimary());
-
                         join = join + " JOIN " + key.GetPrimary() + " ON " + key.GetForeign() +
                         "." + key.GetColumn() + " = " + key.GetPrimary() + "." + key.GetColumn();
                     }
@@ -208,60 +253,55 @@ namespace Proyecto_II_SistemaVentas
             }
             return join;
         }
-        */
 
-        // ADAPTAR FUNCIÓN A LA PROGRA, DEBE SER MÁS GENÉRICA *********************************************
-        /*
-        public DataSet consult(Consult consult, List<Panel_filter> columns)
+        /*********************************************
+            UPDATE
+            *********************************************/
+
+        // Recibe el nombre de la tabla(table), dos strings que forman la condicion del where(where y condition)
+        // Una lista de las columnas que se van a modificar(columns) y una lista con los datos a actualizar(data)
+        public void updateRowData(string table, string where, string condition, List<string> columns, List<string> data)
         {
-            SqlConnection connection = Connection.openConnection();
-            string select = "SELECT ";
-            foreach (Panel_filter panel in columns)
+            try
             {
-                select += panel.getColumnName();
-                if (!columns.ElementAt(columns.Count - 1).getColumnName().Equals(panel.getColumnName()))
+                SqlConnection connection = openConnection();
+                int pos = 0;
+                string values = "";
+                //Este while construye la seccion del sqlcommand del set
+                while (data.Count != pos)
                 {
-                    select += ",";
+                    if (pos + 1 != data.Count)
+                    {
+                        values += data.ElementAt(pos) + "=" + columns.ElementAt(pos) + ",";
+                    }
+                    else
+                    {
+                        values += data.ElementAt(pos) + "=" + columns.ElementAt(pos);
+                    }
+                    pos++;
                 }
+                SqlCommand command = new SqlCommand("UPDATE " + table + " SET " + values + " WHERE " + where + "=" + condition, connection);
+                Console.WriteLine("UPDATE " + table + " SET " + values + " WHERE " + where + "=" + condition);
+                command.ExecuteNonQuery();
             }
-            select += " FROM ";
-            SqlDataAdapter dataAdapter = new SqlDataAdapter(select + this.JoinAll() + " WHERE " + consult.getWhere(), connection);
-            Console.WriteLine(select + this.JoinAll() + " WHERE " + consult.getWhere());
-
-            Console.WriteLine("Where:" + consult.getWhere());
-
-            DataSet data = new DataSet();
-            consult.getConsult();
-            dataAdapter.Fill(data, select + this.JoinAll() + " WHERE " + consult.getWhere());
-
-            connection.Close();
-
-            return data;
-        }
-        */
-
-        /*********************************************
-
-        UPDATE
-
-        *********************************************/
-
-        // Falta comentar *************************************************************************************
-        public void updateRowData(string table, string key, List<string> data)
-        {
-
+            catch (SqlException)
+            {
+                Console.WriteLine("Ha ocurrido un error y no se pudo desarrollar la accion");
+            }
         }
 
-        /*********************************************
+    /*********************************************
+    DELETE
+    *********************************************/
 
-        DELETE
-
-        *********************************************/
-
-        // Falta comentar *************************************************************************************
-        public void deleteRow(string table, string key)
+    // Esta funcion borra una tupla de la base de datos
+    // Recibe el nombre de la tabla y el condicional dividido en dos strings con where siendo la columna
+    // y key el valor del dato
+    public void deleteRow(string table, string where,string key)
         {
-
+            SqlConnection connection = openConnection();
+            SqlCommand command = new SqlCommand("DELETE FROM " + table +" WHERE " + where + "=" + key, connection);
+            command.ExecuteNonQuery();
         }
     }
 }
