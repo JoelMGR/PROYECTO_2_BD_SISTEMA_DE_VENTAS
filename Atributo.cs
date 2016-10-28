@@ -79,6 +79,8 @@ namespace WpfApplication1
             return this.Order_Priority;
         }
 
+        //Construye parte del string del comando SQL(la parte de group by y order by)
+        //Recibe una lista de Atribute
         public static string OrderBy_GroupBy_CMD(List<Atribute> list)
         {
             List<Atribute> group_command = new List<Atribute>();
