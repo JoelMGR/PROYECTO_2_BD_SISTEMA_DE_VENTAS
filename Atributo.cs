@@ -143,31 +143,5 @@ namespace WpfApplication1
 
             return command;
         }
-        /*
-        private static string ConstructCommand(string command,List<Atribute> list)
-        {
-            Atribute current = list.ElementAt(0);
-            while (list.Count != 0)
-            {
-                foreach (Atribute atr in list)
-                {
-                    if (current.getGroup_Priority() > atr.getGroup_Priority())
-                    {
-                        current = atr;
-                    }
-                }
-                
-                command += " "+current.getName();
-                list.Remove(current);
-                
-                if (list.Count != 0)
-                {
-                    command += ",";
-                    current = list.ElementAt(0);
-
-                }
-            }
-            return command;
-        }*/
     }
 }
