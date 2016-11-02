@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Web;
+using System.Windows.Forms;
 
 namespace Proyecto_2.Properties
 {
@@ -112,7 +113,7 @@ namespace Proyecto_2.Properties
             // Messagebox de error
             else
             {
-                Messagebox.Show("Ha ocurrido un error y no se pudo desarrollar la accion.", "ERROR");
+                MessageBox.Show("Ha ocurrido un error y no se pudo desarrollar la accion.", "ERROR");
             }
         }
 
