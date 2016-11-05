@@ -118,21 +118,28 @@ namespace Proyecto_2.Properties
             List<string> data = new List<string>();
             SqlConnection connection = openConnection();
             SqlCommand command = new SqlCommand("SELECT * FROM " + table + " WHERE "+ columnName + "="+ condition, connection);
-            //SqlDataReader reader = command.ExecuteReader();
-            SqlDataAdapter adaptordie = new SqlDataAdapter();
-            adaptordie.TableMappings.Add("Persona", "Empresa");
-            adaptordie.SelectCommand = command;
-            DataSet datatable = new DataSet("Name");
-            adaptordie.Fill(datatable);
-            /*
-            while (reader.Read())
-            {
-                string tmpData = reader.GetString(0);
-                data.Add(tmpData);
-                reader.GetString(0);
-            }
-            connection.Close();*/
+            SqlDataAdapter adapter = new SqlDataAdapter();
+            adapter.SelectCommand = command;
+            DataSet datatable = new DataSet();
+            adapter.Fill(datatable);
             return datatable;
+        }
+        
+        public List<string> getTableDataAsStrings(string columnName, string table, string condition,string operation)
+        {
+            List<string> data = new List<string>();
+            SqlConnection connection = openConnection();
+            SqlCommand command = new SqlCommand("SELECT * FROM " + table + " WHERE " + columnName + operation + condition, connection);
+            SqlDataReader reader = command.ExecuteReader();
+            reader.Read();
+            int pos = 0;
+            while (reader.FieldCount != data.Count)
+            {
+                data.Add((reader.GetValue(pos).ToString()));
+                pos++;
+            }
+            connection.Close();
+            return data;
         }
 
         // Esta funcion se encarga de obtener el nombre de las columnas de una tabla.
