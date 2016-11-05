@@ -239,6 +239,7 @@ namespace Proyecto_2.Properties
                     join += " " + table1 + "." + foraneas.ElementAt(pos).GetColumn()+"=" + table2 + "." + foraneas.ElementAt(pos).GetColumn();
                     break;
                 }
+                pos++;
             }
             if (join.Equals(""))
             {
